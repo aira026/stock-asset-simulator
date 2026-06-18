@@ -372,10 +372,13 @@
     <div class="section-title">基本參數</div>
     <div class="param-grid">
       <div class="param-card">
-        <div class="param-label">目前持有股數<span class="hint">股</span></div>
-       <div class="param-value" id="vShares">0</div>
-       <input type="range" id="rShares" min="0" max="1000" value="0" step="1">
-      </div>
+  <div class="param-label">目前持有股數<span class="hint">股</span></div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="param-value" id="vShares">0</div>
+    <input type="number" id="nShares" min="0" max="1000" step="1" value="0" style="width:96px;">
+  </div>
+  <input type="range" id="rShares" min="0" max="1000" value="0" step="1">
+</div>
       <div class="param-card">
         <div class="param-label">目前股價<span class="hint">元</span></div>
         <div class="param-value" id="vPrice">2,350</div>
@@ -538,7 +541,28 @@ sliders.forEach(({r,v,fmt}) => {
     compute();
   });
 });
+  
+const rShares = document.getElementById('rShares');
+const nShares = document.getElementById('nShares');
+const vShares = document.getElementById('vShares');
 
+if (rShares && nShares && vShares) {
+  rShares.addEventListener('input', function () {
+    nShares.value = this.value;
+    vShares.textContent = this.value;
+    compute();
+  });
+
+  nShares.addEventListener('input', function () {
+    let val = +this.value;
+    if (isNaN(val)) return;
+
+    val = Math.max(+rShares.min, Math.min(+rShares.max, val));
+    rShares.value = val;
+    vShares.textContent = val;
+    compute();
+  });
+}
 // Target buttons
 document.getElementById('targetRow').addEventListener('click', e => {
   const btn = e.target.closest('.target-btn');
