@@ -1,398 +1,754 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="theme-color" content="#0f766e" />
-  <title>Vocab Daily</title>
-  <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
-  <link rel="preconnect" href="https://api.fontshare.com">
-  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
-      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
-      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
-      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
-      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2rem);
-      --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem;
-      --radius-sm: 0.5rem; --radius-md: 0.875rem; --radius-lg: 1.25rem; --radius-full: 9999px;
-      --shadow-sm: 0 4px 12px rgba(0,0,0,.06); --shadow-md: 0 12px 32px rgba(0,0,0,.10);
-      --font-body: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      --color-bg: #f7f6f2; --color-surface:#ffffff; --color-surface-2:#f3f0ec; --color-border:#ddd7cf;
-      --color-text:#1f2937; --color-text-muted:#6b7280; --color-primary:#0f766e; --color-primary-2:#0c5c56; --color-accent:#dff4f1; --color-good:#3f7a1f; --color-bad:#a12c44;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { -webkit-text-size-adjust:none; text-size-adjust:none; }
-    body {
-      min-height: 100dvh; font-family: var(--font-body); font-size: var(--text-base); color: var(--color-text);
-      background: linear-gradient(180deg, #eef7f5 0%, var(--color-bg) 18%, var(--color-bg) 100%);
-      padding: env(safe-area-inset-top) var(--space-4) calc(env(safe-area-inset-bottom) + 88px);
-    }
-    button, input, textarea { font: inherit; }
-    .app { max-width: 560px; margin: 0 auto; padding-top: var(--space-4); }
-    .topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom: var(--space-6); }
-    .logo { display:flex; align-items:center; gap: .75rem; }
-    .logo-mark { width: 2.5rem; height: 2.5rem; border-radius: 0.9rem; background: linear-gradient(135deg, var(--color-primary), #34b3a0); display:grid; place-items:center; color:#fff; box-shadow: var(--shadow-sm); }
-    .logo h1 { font-size: var(--text-lg); line-height:1.1; }
-    .logo p { color: var(--color-text-muted); font-size: var(--text-sm); }
-    .ghost-btn { border:1px solid var(--color-border); background: rgba(255,255,255,.7); color: var(--color-text); border-radius: var(--radius-full); padding: .7rem .95rem; }
-    .hero { background: rgba(255,255,255,.72); border:1px solid rgba(255,255,255,.8); backdrop-filter: blur(10px); border-radius: var(--radius-lg); padding: var(--space-5); box-shadow: var(--shadow-md); margin-bottom: var(--space-5); }
-    .hero .badge { display:inline-flex; gap:.4rem; align-items:center; font-size:var(--text-xs); color:var(--color-primary); background: var(--color-accent); padding: .4rem .7rem; border-radius: var(--radius-full); margin-bottom: .8rem; }
-    .hero h2 { font-size: var(--text-xl); margin-bottom: .5rem; }
-    .hero p { color: var(--color-text-muted); line-height: 1.55; }
-    .stats { display:grid; grid-template-columns: repeat(3,1fr); gap: .75rem; margin-top: var(--space-4); }
-    .stat { background: var(--color-surface); border:1px solid var(--color-border); border-radius: var(--radius-md); padding: .85rem; }
-    .stat small { display:block; color: var(--color-text-muted); font-size: var(--text-xs); margin-bottom:.25rem; }
-    .stat strong { font-size: var(--text-lg); }
-    .section { display:none; }
-    .section.active { display:block; }
-    .card { background: var(--color-surface); border:1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-5); box-shadow: var(--shadow-sm); margin-bottom: var(--space-4); }
-    .section-title { display:flex; justify-content:space-between; align-items:end; margin-bottom: var(--space-4); }
-    .section-title h3 { font-size: var(--text-lg); }
-    .section-title span { color: var(--color-text-muted); font-size: var(--text-sm); }
-    .word { font-size: clamp(2rem, 1.4rem + 4vw, 2.8rem); font-weight: 700; line-height: 1; margin-bottom: .5rem; }
-    .meta { display:flex; flex-wrap:wrap; gap:.5rem; margin-bottom: 1rem; }
-    .chip { background: var(--color-surface-2); color: var(--color-text-muted); padding: .42rem .7rem; border-radius: var(--radius-full); font-size: var(--text-xs); }
-    .prompt { color: var(--color-text-muted); margin-bottom: .75rem; }
-    .answer { background: #fafaf8; border:1px dashed var(--color-border); border-radius: var(--radius-md); padding: .9rem; margin-top: .75rem; line-height:1.55; }
-    .actions { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; margin-top: var(--space-4); }
-    .btn { min-height: 48px; border:0; border-radius: 1rem; padding: .9rem 1rem; font-weight:700; }
-    .btn-primary { background: var(--color-primary); color:#fff; }
-    .btn-secondary { background: #edf7f5; color: var(--color-primary); border:1px solid #c7e7e1; }
-    .btn-good { background: #ecf6e7; color: var(--color-good); border:1px solid #d4e8c8; }
-    .btn-bad { background: #faecef; color: var(--color-bad); border:1px solid #efcfd8; }
-    .field { margin-bottom: 1rem; }
-    .field label { display:block; font-size: var(--text-sm); margin-bottom: .45rem; color: var(--color-text-muted); }
-    .field input, .field textarea { width:100%; border:1px solid var(--color-border); border-radius: .95rem; padding: .95rem 1rem; background:#fff; }
-    .field textarea { min-height: 92px; resize: vertical; }
-    .helper { color: var(--color-text-muted); font-size: var(--text-xs); margin-top: .35rem; }
-    .list { display:grid; gap:.75rem; }
-    .list-item { border:1px solid var(--color-border); border-radius: 1rem; padding: .95rem; background:#fff; }
-    .list-item-top { display:flex; justify-content:space-between; gap: .75rem; margin-bottom:.5rem; }
-    .list-item strong { font-size: 1.05rem; }
-    .muted { color: var(--color-text-muted); }
-    .bottom-nav { position:fixed; left:0; right:0; bottom:0; padding: .7rem 1rem calc(env(safe-area-inset-bottom) + .7rem); background: rgba(250,249,246,.92); backdrop-filter: blur(14px); border-top:1px solid rgba(0,0,0,.06); }
-    .bottom-nav-inner { max-width:560px; margin:0 auto; display:grid; grid-template-columns:repeat(3,1fr); gap:.75rem; }
-    .nav-btn { min-height: 54px; border-radius: 1rem; border:1px solid transparent; background: transparent; color: var(--color-text-muted); font-weight:700; }
-    .nav-btn.active { background:#fff; color: var(--color-primary); border-color: #d9ebe8; box-shadow: var(--shadow-sm); }
-    .tiny { font-size: var(--text-xs); }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>零股資產試算器</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --bg: #0f0f11;
+    --surface: #18181c;
+    --surface2: #222228;
+    --border: #2e2e38;
+    --text: #f0f0f4;
+    --text2: #8b8b9e;
+    --text3: #555566;
+    --accent: #4f8ef7;
+    --accent-dim: #1a2d52;
+    --green: #2ecc87;
+    --green-dim: #0d3324;
+    --amber: #f5a623;
+    --amber-dim: #3a2800;
+    --red: #f75f5f;
+    --font-mono: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    --font: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 15px; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 0 4rem;
+  }
+
+  /* Header */
+  .header {
+    padding: 2.5rem 1.5rem 2rem;
+    border-bottom: 1px solid var(--border);
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .header-eyebrow {
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-family: var(--font-mono);
+    margin-bottom: .6rem;
+  }
+  .header h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    letter-spacing: -.02em;
+    line-height: 1.2;
+    margin-bottom: .4rem;
+  }
+  .header p {
+    font-size: .875rem;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+
+  .main { max-width: 900px; margin: 0 auto; padding: 1.5rem; }
+
+  /* Sections */
+  .section { margin-bottom: 1.5rem; }
+  .section-title {
+    font-size: .7rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    font-family: var(--font-mono);
+    margin-bottom: .875rem;
+  }
+
+  /* Param grid */
+  .param-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .75rem;
+  }
+  @media(max-width:600px){ .param-grid{ grid-template-columns:1fr; } }
+
+  .param-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: .875rem 1rem;
+  }
+  .param-label {
+    font-size: .75rem;
+    color: var(--text2);
+    margin-bottom: .5rem;
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+  }
+  .param-label .hint {
+    font-size: .65rem;
+    color: var(--text3);
+    background: var(--surface2);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+  .param-value {
+    font-size: 1.3rem;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    color: var(--text);
+    margin-bottom: .625rem;
+    letter-spacing: -.01em;
+  }
+  input[type=range] {
+    width: 100%;
+    accent-color: var(--accent);
+    height: 3px;
+    cursor: pointer;
+  }
+
+  /* Bonus events */
+  .bonus-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem;
+  }
+  .bonus-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: .5rem;
+    align-items: end;
+    margin-bottom: .5rem;
+  }
+  .bonus-row:last-child { margin-bottom: 0; }
+  .field-label { font-size: .72rem; color: var(--text2); margin-bottom: .3rem; }
+  .field-input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: .875rem;
+    padding: .45rem .65rem;
+    width: 100%;
+    outline: none;
+    transition: border-color .15s;
+  }
+  .field-input:focus { border-color: var(--accent); }
+  .btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text2);
+    font-size: .8rem;
+    padding: .45rem .75rem;
+    cursor: pointer;
+    transition: all .15s;
+    white-space: nowrap;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-add {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-size: .78rem;
+    padding: .4rem .9rem;
+    margin-top: .5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+  }
+  .btn-add:hover { background: var(--accent); color: #fff; }
+  .btn-remove {
+    background: transparent;
+    border-color: var(--border);
+    color: var(--text3);
+    padding: .45rem .6rem;
+    font-size: 1rem;
+    line-height: 1;
+  }
+  .btn-remove:hover { border-color: var(--red); color: var(--red); }
+
+  /* Metric cards */
+  .metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: .75rem;
+  }
+  .metric {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem;
+  }
+  .metric.accent { border-color: var(--accent); background: var(--accent-dim); }
+  .metric.green { border-color: var(--green); background: var(--green-dim); }
+  .metric-label { font-size: .7rem; color: var(--text2); margin-bottom: .3rem; }
+  .metric.accent .metric-label { color: #7aaeff; }
+  .metric.green .metric-label { color: #5de8a8; }
+  .metric-val {
+    font-size: 1.35rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    letter-spacing: -.02em;
+  }
+  .metric.accent .metric-val { color: var(--accent); }
+  .metric.green .metric-val { color: var(--green); }
+  .metric-sub { font-size: .7rem; color: var(--text3); margin-top: .25rem; }
+  .metric.accent .metric-sub { color: #5a83cc; }
+  .metric.green .metric-sub { color: #2a8a60; }
+
+  /* Chart */
+  .chart-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+  }
+  .chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    font-size: .75rem;
+    color: var(--text2);
+  }
+  .chart-legend span { display: flex; align-items: center; gap: .4rem; }
+  .leg-line {
+    width: 24px;
+    height: 2px;
+    display: inline-block;
+    border-radius: 1px;
+  }
+  canvas { width: 100% !important; }
+
+  /* Target selector */
+  .target-row {
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+  .target-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--text2);
+    font-family: var(--font-mono);
+    font-size: .78rem;
+    padding: .35rem .9rem;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .target-btn.active {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .target-btn:hover:not(.active) { border-color: var(--text2); color: var(--text); }
+
+  /* Table */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .table-header {
+    padding: .875rem 1rem;
+    border-bottom: 1px solid var(--border);
+    font-size: .75rem;
+    color: var(--text2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: .78rem; }
+  th {
+    text-align: left;
+    font-weight: 500;
+    color: var(--text3);
+    font-size: .68rem;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    padding: .5rem .875rem;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-mono);
+    white-space: nowrap;
+  }
+  td {
+    padding: .45rem .875rem;
+    border-bottom: 1px solid #1c1c22;
+    font-family: var(--font-mono);
+    white-space: nowrap;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr.row-hit td { background: #0d2040; color: var(--accent); font-weight: 600; }
+  tr.row-bonus td { background: #2a1e00; }
+  .badge {
+    display: inline-block;
+    font-size: .65rem;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-family: var(--font-mono);
+  }
+  .badge-green { background: var(--green-dim); color: var(--green); border: 1px solid #1a5e3a; }
+  .badge-blue { background: var(--accent-dim); color: var(--accent); border: 1px solid #1e3d7a; }
+  .badge-amber { background: var(--amber-dim); color: var(--amber); border: 1px solid #5a3a00; }
+
+  /* Compound breakdown */
+  .breakdown {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.1rem;
+  }
+  .breakdown-title {
+    font-size: .7rem;
+    color: var(--text3);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    font-family: var(--font-mono);
+    margin-bottom: .875rem;
+  }
+  .br-row {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin-bottom: .6rem;
+  }
+  .br-row:last-child { margin-bottom: 0; }
+  .br-label { font-size: .75rem; color: var(--text2); min-width: 90px; }
+  .br-bar-wrap {
+    flex: 1;
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .br-bar { height: 100%; border-radius: 3px; transition: width .5s cubic-bezier(.4,0,.2,1); }
+  .br-val { font-size: .75rem; font-family: var(--font-mono); color: var(--text2); min-width: 80px; text-align: right; }
+  .breakdown-note {
+    font-size: .72rem;
+    color: var(--text3);
+    margin-top: .75rem;
+    line-height: 1.6;
+    padding-top: .75rem;
+    border-top: 1px solid var(--border);
+  }
+  .breakdown-note em { color: var(--accent); font-style: normal; }
+
+  .divider { height: 1px; background: var(--border); margin: 1.5rem 0; }
+</style>
 </head>
 <body>
-  <div class="app">
-    <header class="topbar">
-      <div class="logo">
-        <div class="logo-mark" aria-hidden="true">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h6"/><path d="M9 11h8"/></svg>
-        </div>
-        <div>
-          <h1>Vocab Daily</h1>
-          <p>每天 3–5 分鐘就好</p>
-        </div>
+
+<div class="header">
+  <div class="header-eyebrow">零股資產試算器</div>
+  <h1> 你的資產沙盤推演 </h1>
+  <p>設定你的股票參數與每月投入，加入任意單月特別注資（年終、獎金、還款等），<br>即時試算資產達標時間與複利組成。</p>
+</div>
+
+<div class="main">
+
+  <!-- 基本參數 -->
+  <div class="section">
+    <div class="section-title">基本參數</div>
+    <div class="param-grid">
+      <div class="param-card">
+        <div class="param-label">目前持有股數<span class="hint">股</span></div>
+        <div class="param-value" id="vShares">146</div>
+        <input type="range" id="rShares" min="0" max="500" value="146" step="1">
       </div>
-      <button class="ghost-btn" id="seedBtn" aria-label="載入示範資料">示範</button>
-    </header>
-
-    <section class="hero">
-      <div class="badge">可加到主畫面 · 像 App 一樣打開</div>
-      <h2>每天背單字</h2>
-      <p>今天先做該複習的字，再視情況新增 1–3 個新字。你最棒！</p>
-      <div class="stats">
-        <div class="stat"><small>今天到期</small><strong id="dueCount">0</strong></div>
-        <div class="stat"><small>單字總數</small><strong id="totalCount">0</strong></div>
-        <div class="stat"><small>連續完成</small><strong id="streakCount">1</strong></div>
+      <div class="param-card">
+        <div class="param-label">目前股價<span class="hint">元</span></div>
+        <div class="param-value" id="vPrice">2,350</div>
+        <input type="range" id="rPrice" min="500" max="5000" value="2350" step="10">
       </div>
-    </section>
-
-    <main>
-      <section id="review" class="section active" aria-label="今日複習">
-        <div class="section-title"><h3>今日複習</h3><span id="reviewLabel">先回想再看答案</span></div>
-        <div id="reviewEmpty" class="card">
-          <p class="muted">今天還沒有到期的單字。你可以先新增 1–3 個字，或按右上角的「示範」看看操作。</p>
-        </div>
-        <div id="reviewCard" class="card" hidden>
-          <div class="word" id="reviewWord">impact</div>
-          <div class="meta">
-            <div class="chip" id="reviewMeaning">影響</div>
-            <div class="chip" id="reviewDue">今天複習</div>
-          </div>
-          <p class="prompt">先想想這個字常怎麼搭配，再按「看答案」。</p>
-          <button class="btn btn-secondary" id="showAnswerBtn">看答案</button>
-          <div class="answer" id="answerBox" hidden></div>
-          <div class="actions" id="gradeActions" hidden>
-            <button class="btn btn-bad" id="againBtn">不熟，再快點出現</button>
-            <button class="btn btn-good" id="goodBtn">熟，下次晚一點</button>
-          </div>
-        </div>
-      </section>
-
-      <section id="add" class="section" aria-label="新增單字">
-        <div class="section-title"><h3>新增單字</h3><span>一次 1–3 個最剛好</span></div>
-        <div class="card">
-          <div class="field">
-            <label for="wordInput">單字</label>
-            <input id="wordInput" placeholder="例如 impact" />
-          </div>
-          <div class="field">
-            <label for="meaningInput">中文意思</label>
-            <input id="meaningInput" placeholder="例如 影響" />
-          </div>
-          <div class="field">
-            <label for="collocationInput">搭配詞</label>
-            <input id="collocationInput" placeholder="例如 have an impact on ; positive impact" />
-            <div class="helper">用分號 ; 分隔兩個搭配詞就可以。</div>
-          </div>
-          <div class="field">
-            <label for="exampleInput">例句</label>
-            <textarea id="exampleInput" placeholder="例如 The campaign had a big impact on customer behavior."></textarea>
-          </div>
-          <button class="btn btn-primary" id="saveBtn">加入單字庫</button>
-        </div>
-      </section>
-
-      <section id="library" class="section" aria-label="單字庫">
-        <div class="section-title"><h3>單字庫</h3><span>你收過的字都在這裡</span></div>
-        <div id="libraryList" class="list"></div>
-      </section>
-    </main>
+      <div class="param-card">
+        <div class="param-label">每月固定投入<span class="hint">元</span></div>
+        <div class="param-value" id="vMonthly">15,000</div>
+        <input type="range" id="rMonthly" min="1000" max="100000" value="15000" step="500">
+      </div>
+      <div class="param-card">
+        <div class="param-label">年化報酬率<span class="hint">%</span></div>
+        <div class="param-value" id="vRate">22</div>
+        <input type="range" id="rRate" min="3" max="50" value="22" step="1">
+      </div>
+    </div>
   </div>
 
-  <nav class="bottom-nav" aria-label="主要功能">
-    <div class="bottom-nav-inner">
-      <button class="nav-btn active" data-target="review">複習</button>
-      <button class="nav-btn" data-target="add">新增</button>
-      <button class="nav-btn" data-target="library">單字庫</button>
+  <!-- 目標金額 -->
+  <div class="section">
+    <div class="section-title">目標金額</div>
+    <div class="target-row" id="targetRow">
+      <button class="target-btn active" data-val="1000000">100 萬</button>
+      <button class="target-btn" data-val="3000000">300 萬</button>
+      <button class="target-btn" data-val="5000000">500 萬</button>
+      <button class="target-btn" data-val="10000000">1,000 萬</button>
+      <button class="target-btn" data-val="21000000">2,100 萬（財富自由）</button>
     </div>
-  </nav>
+    <div style="display:flex;gap:.5rem;align-items:center">
+      <span style="font-size:.78rem;color:var(--text2)">自訂目標（元）</span>
+      <input class="field-input" id="customTarget" type="number" placeholder="例：2000000" style="max-width:200px;font-size:.85rem">
+      <button class="btn" onclick="applyCustomTarget()">套用</button>
+    </div>
+  </div>
 
-  <script>
-    const STORAGE_KEY = 'vocab-daily-data-v1';
-    const STREAK_KEY = 'vocab-daily-streak-v1';
-    const intervalsGood = [1, 3, 7, 14, 30];
-    const intervalsAgain = [0, 1, 3, 7, 14];
+  <!-- 特別注資 -->
+  <div class="section">
+    <div class="section-title">單月特別注資 <span style="font-size:.65rem;color:var(--text3);letter-spacing:0;text-transform:none">年終獎金、還款、任意加碼</span></div>
+    <div class="bonus-section">
+      <div id="bonusList"></div>
+      <button class="btn btn-add" onclick="addBonus()">＋ 新增注資</button>
+    </div>
+  </div>
 
-    const todayStr = () => new Date().toISOString().slice(0,10);
-    const addDays = (dateStr, days) => {
-      const d = new Date(dateStr + 'T12:00:00');
-      d.setDate(d.getDate() + days);
-      return d.toISOString().slice(0,10);
-    };
+  <!-- 摘要卡 -->
+  <div class="section">
+    <div class="section-title">試算結果</div>
+    <div class="metric-grid" id="metrics"></div>
+  </div>
 
-    const seedWords = [
-      { word:'impact', meaning:'影響', collocations:["have an impact on", "positive impact"], example:'The new packaging had a positive impact on sales.', level:0, nextReview:todayStr(), createdAt:todayStr() },
-      { word:'maintain', meaning:'維持', collocations:["maintain quality", "maintain a balance"], example:'It is hard to maintain a healthy balance during busy weeks.', level:0, nextReview:todayStr(), createdAt:todayStr() },
-      { word:'launch', meaning:'推出；發表', collocations:["launch a campaign", "product launch"], example:'The brand will launch a new campaign next month.', level:0, nextReview:todayStr(), createdAt:todayStr() },
-      { word:'opportunity', meaning:'機會', collocations:["opportunity to learn", "job opportunity"], example:'This trip is a great opportunity to improve your English.', level:0, nextReview:todayStr(), createdAt:todayStr() },
-      { word:'responsibility', meaning:'責任', collocations:["take responsibility for", "sense of responsibility"], example:'She took responsibility for the mistake.', level:0, nextReview:todayStr(), createdAt:todayStr() },
-      { word:'schedule', meaning:'行程；排程', collocations:["busy schedule", "work schedule"], example:'My schedule is full this week.', level:0, nextReview:todayStr(), createdAt:todayStr() },
-      { word:'decision', meaning:'決定', collocations:["make a decision", "final decision"], example:'It was a difficult decision to make.', level:0, nextReview:todayStr(), createdAt:todayStr() },
-      { word:'benefit', meaning:'好處；受益', collocations:["benefit from", "health benefits"], example:'You can benefit from reading every day.', level:0, nextReview:todayStr(), createdAt:todayStr() },
-      { word:'achieve', meaning:'達成；實現', collocations:["achieve a goal", "achieve success"], example:'She worked hard to achieve her goal.', level:0, nextReview:todayStr(), createdAt:todayStr() },
-      { word:'improve', meaning:'改善；進步', collocations:["improve skills", "improve performance"], example:'Daily practice will improve your vocabulary.', level:0, nextReview:todayStr(), createdAt:todayStr() },
-      { word:'develop', meaning:'發展；培養', collocations:["develop a habit", "develop skills"], example:'Try to develop a daily review habit.', level:0, nextReview:todayStr(), createdAt:todayStr() },
-      { word:'require', meaning:'需要；要求', collocations:["require attention", "require effort"], example:'This task requires patience and focus.', level:0, nextReview:todayStr(), createdAt:todayStr() },
-      { word:'available', meaning:'可取得的；可用的', collocations:["be available for", "available time"], example:'I’m available after 7 p.m.', level:0, nextReview:todayStr(), createdAt:todayStr() },
-      { word:'purpose', meaning:'目的', collocations:["for the purpose of", "main purpose"], example:'The purpose of this app is to help you review words.', level:0, nextReview:todayStr(), createdAt:todayStr() },
-      { word:'estimate', meaning:'估計', collocations:["estimate the cost", "rough estimate"], example:'I estimate it will take 10 minutes.', level:0, nextReview:todayStr(), createdAt:todayStr() },
-      { word:'approach', meaning:'方法；接近', collocations:["a new approach", "approach a problem"], example:'Try a different approach if this one feels hard.', level:0, nextReview:todayStr(), createdAt:todayStr() },
-      { word:'consider', meaning:'考慮', collocations:["consider doing", "take into consideration"], example:'Please consider starting with five words a day.', level:0, nextReview:todayStr(), createdAt:todayStr() },
-      { word:'support', meaning:'支持；幫助', collocations:["support a plan", "support each other"], example:'A good system supports long-term habits.', level:0, nextReview:todayStr(), createdAt:todayStr() },
-      { word:'suggest', meaning:'建議；暗示', collocations:["suggest a plan", "suggest that"], example:'I suggest keeping the daily goal very small.', level:0, nextReview:todayStr(), createdAt:todayStr() },
-      { word:'focus', meaning:'專注', collocations:["focus on", "stay focused"], example:'Focus on the words you actually use.', level:0, nextReview:todayStr(), createdAt:todayStr() },
-      { word:'regularly', meaning:'定期地；規律地', collocations:["check regularly", "study regularly"], example:'Review the cards regularly to remember them longer.', level:0, nextReview:todayStr(), createdAt:todayStr() },
-      { word:'reduce', meaning:'減少', collocations:["reduce stress", "reduce mistakes"], example:'A simple routine can reduce stress.', level:0, nextReview:todayStr(), createdAt:todayStr() },
-      { word:'increase', meaning:'增加', collocations:["increase confidence", "increase vocabulary"], example:'Regular practice can increase confidence.', level:0, nextReview:todayStr(), createdAt:todayStr() },
-      { word:'avoid', meaning:'避免', collocations:["avoid mistakes", "avoid wasting time"], example:'Try to avoid learning too many words at once.', level:0, nextReview:todayStr(), createdAt:todayStr() },
-      { word:'instead', meaning:'取代；反而', collocations:["instead of", "do this instead"], example:'Use collocations instead of only memorizing one meaning.', level:0, nextReview:todayStr(), createdAt:todayStr() },
-      { word:'detail', meaning:'細節', collocations:["in detail", "pay attention to detail"], example:'The app shows key details for each word.', level:0, nextReview:todayStr(), createdAt:todayStr() },
-      { word:'memory', meaning:'記憶', collocations:["long-term memory", "memory trick"], example:'Spaced repetition is great for memory.', level:0, nextReview:todayStr(), createdAt:todayStr() },
-      { word:'review', meaning:'複習；回顧', collocations:["review words", "daily review"], example:'Spend a few minutes to review words every day.', level:0, nextReview:todayStr(), createdAt:todayStr() },
-      { word:'vocabulary', meaning:'詞彙', collocations:["build vocabulary", "vocabulary list"], example:'You can build vocabulary little by little.', level:0, nextReview:todayStr(), createdAt:todayStr() },
-      { word:'collocation', meaning:'搭配詞', collocations:["common collocation", "word collocation"], example:'Learning collocations helps you sound natural.', level:0, nextReview:todayStr(), createdAt:todayStr() }
-    ];
+  <!-- 圖表 -->
+  <div class="section">
+    <div class="chart-wrap">
+      <div class="chart-legend">
+        <span><b class="leg-line" style="background:#4f8ef7"></b>含特別注資</span>
+        <span><b class="leg-line" style="background:#555566;border-top:2px dashed #555566;background:none"></b>不含注資</span>
+        <span><b class="leg-line" style="background:#f75f5f;border-top:2px dashed #f75f5f;background:none"></b>目標線</span>
+      </div>
+      <div style="position:relative;height:280px">
+        <canvas id="chart"></canvas>
+      </div>
+    </div>
+  </div>
 
-    const els = {
-      sections: [...document.querySelectorAll('.section')],
-      navBtns: [...document.querySelectorAll('.nav-btn')],
-      dueCount: document.getElementById('dueCount'),
-      totalCount: document.getElementById('totalCount'),
-      streakCount: document.getElementById('streakCount'),
-      reviewEmpty: document.getElementById('reviewEmpty'),
-      reviewCard: document.getElementById('reviewCard'),
-      reviewWord: document.getElementById('reviewWord'),
-      reviewMeaning: document.getElementById('reviewMeaning'),
-      reviewDue: document.getElementById('reviewDue'),
-      answerBox: document.getElementById('answerBox'),
-      showAnswerBtn: document.getElementById('showAnswerBtn'),
-      gradeActions: document.getElementById('gradeActions'),
-      againBtn: document.getElementById('againBtn'),
-      goodBtn: document.getElementById('goodBtn'),
-      saveBtn: document.getElementById('saveBtn'),
-      seedBtn: document.getElementById('seedBtn'),
-      libraryList: document.getElementById('libraryList'),
-      wordInput: document.getElementById('wordInput'),
-      meaningInput: document.getElementById('meaningInput'),
-      collocationInput: document.getElementById('collocationInput'),
-      exampleInput: document.getElementById('exampleInput')
-    };
+  <!-- 複利組成 -->
+  <div class="section">
+    <div class="breakdown" id="breakdown"></div>
+  </div>
 
-    let words = loadWords();
-    let reviewQueue = [];
-    let currentIndex = 0;
+  <!-- 逐月表格 -->
+  <div class="section">
+    <div class="table-wrap">
+      <div class="table-header">
+        <span>逐月沙盤推演</span>
+        <span id="tableRange" style="color:var(--text3)"></span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>月份</th>
+              <th>估計股價</th>
+              <th>固定買入</th>
+              <th>特別注資</th>
+              <th>新增股數</th>
+              <th>累積股數</th>
+              <th>資產估值</th>
+              <th>狀態</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
-    function loadWords() {
-      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
-      catch { return []; }
+</div>
+
+<script>
+const f = n => Math.round(n).toLocaleString('zh-TW');
+const fm = n => n >= 1e6 ? '$' + (n/1e6).toFixed(2) + 'M' : '$' + (n/10000).toFixed(1) + '萬';
+
+let target = 1000000;
+let bonuses = [{ year: 2026, month: 12, amount: 100000, label: '阿姨還款' }];
+let chartInst = null;
+let bonusId = 0;
+
+// Init bonus list
+function renderBonusList() {
+  const el = document.getElementById('bonusList');
+  el.innerHTML = '';
+  bonuses.forEach((b, i) => {
+    const row = document.createElement('div');
+    row.className = 'bonus-row';
+    row.innerHTML = `
+      <div>
+        <div class="field-label">說明</div>
+        <input class="field-input" value="${b.label}" oninput="bonuses[${i}].label=this.value;compute()" placeholder="例：年終獎金">
+      </div>
+      <div>
+        <div class="field-label">年 / 月</div>
+        <div style="display:flex;gap:.35rem">
+          <input class="field-input" type="number" value="${b.year}" min="2024" max="2060" oninput="bonuses[${i}].year=+this.value;compute()" style="width:72px">
+          <input class="field-input" type="number" value="${b.month}" min="1" max="12" oninput="bonuses[${i}].month=+this.value;compute()" style="width:52px">
+        </div>
+      </div>
+      <div>
+        <div class="field-label">金額（元）</div>
+        <input class="field-input" type="number" value="${b.amount}" oninput="bonuses[${i}].amount=+this.value;compute()" placeholder="50000">
+      </div>
+      <button class="btn btn-remove" onclick="removeBonus(${i})">✕</button>
+    `;
+    el.appendChild(row);
+  });
+}
+
+function addBonus() {
+  const now = new Date();
+  bonuses.push({ year: now.getFullYear(), month: now.getMonth() + 1, amount: 50000, label: '獎金' });
+  renderBonusList();
+  compute();
+}
+
+function removeBonus(i) {
+  bonuses.splice(i, 1);
+  renderBonusList();
+  compute();
+}
+
+// Slider bindings
+const sliders = [
+  { r: 'rShares', v: 'vShares', fmt: n => n + ' 股' },
+  { r: 'rPrice',  v: 'vPrice',  fmt: n => (+n).toLocaleString('zh-TW') + ' 元' },
+  { r: 'rMonthly',v: 'vMonthly',fmt: n => (+n).toLocaleString('zh-TW') + ' 元' },
+  { r: 'rRate',   v: 'vRate',   fmt: n => n + ' %' },
+];
+sliders.forEach(({r,v,fmt}) => {
+  document.getElementById(r).addEventListener('input', function(){
+    document.getElementById(v).textContent = fmt(this.value);
+    compute();
+  });
+});
+
+// Target buttons
+document.getElementById('targetRow').addEventListener('click', e => {
+  const btn = e.target.closest('.target-btn');
+  if (!btn) return;
+  document.querySelectorAll('.target-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  target = +btn.dataset.val;
+  document.getElementById('customTarget').value = '';
+  compute();
+});
+
+function applyCustomTarget() {
+  const v = +document.getElementById('customTarget').value;
+  if (!v || v < 1000) return;
+  target = v;
+  document.querySelectorAll('.target-btn').forEach(b => b.classList.remove('active'));
+  compute();
+}
+
+function getBonusForMonth(year, month) {
+  return bonuses.filter(b => b.year === year && b.month === month).reduce((s,b) => s + b.amount, 0);
+}
+
+function compute() {
+  const shares0 = +document.getElementById('rShares').value;
+  const price0  = +document.getElementById('rPrice').value;
+  const monthly = +document.getElementById('rMonthly').value;
+  const annRate = +document.getElementById('rRate').value / 100;
+  const mr = Math.pow(1 + annRate, 1/12) - 1;
+
+  // figure out how many months to simulate: enough to hit target or at least 60
+  const BASE_MONTHS = 60;
+  const MAX_MONTHS  = 360;
+
+  let shares = shares0, sharesNB = shares0;
+  let price = price0, priceNB = price0;
+  let hit = null, hitNB = null;
+  const rows = [], labArr = [], wB = [], woB = [];
+  let totalCashIn = shares0 * price0;
+  const startDate = new Date(2026, 5, 1); // June 2026
+
+  let months = BASE_MONTHS;
+  // pre-scan to find hit
+  {
+    let s = shares0, p = price0, m = monthly;
+    for (let i = 1; i <= MAX_MONTHS; i++) {
+      p *= (1 + mr);
+      const d = new Date(startDate); d.setMonth(d.getMonth() + i);
+      const bonus = getBonusForMonth(d.getFullYear(), d.getMonth() + 1);
+      const ns = Math.floor((m + bonus) / p);
+      s += ns;
+      if (s * p >= target && months < i + 6) months = Math.min(i + 6, MAX_MONTHS);
+      if (s * p >= target && !hit) { hit = i; break; }
     }
+    months = Math.max(months, BASE_MONTHS);
+  }
 
-    function saveWords() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(words));
-    }
+  for (let i = 1; i <= months; i++) {
+    price  *= (1 + mr);
+    priceNB *= (1 + mr);
+    const d = new Date(startDate); d.setMonth(d.getMonth() + i);
+    const yr = d.getFullYear(), mo = d.getMonth() + 1;
+    const lbl = yr + '/' + String(mo).padStart(2,'0');
+    const bonus = getBonusForMonth(yr, mo);
 
-    function updateStreak() {
-      const today = todayStr();
-      const raw = JSON.parse(localStorage.getItem(STREAK_KEY) || '{}');
-      if (raw.lastOpen === today) return raw.count || 1;
-      const yesterday = addDays(today, -1);
-      const count = raw.lastOpen === yesterday ? (raw.count || 1) + 1 : 1;
-      localStorage.setItem(STREAK_KEY, JSON.stringify({ lastOpen: today, count }));
-      return count;
-    }
+    const totalCash = monthly + bonus;
+    const ns = Math.floor(totalCash / price);
+    shares += ns;
+    const av = shares * price;
 
-    function getDueWords() {
-      const today = todayStr();
-      return words.filter(w => !w.nextReview || w.nextReview <= today);
-    }
+    const nsNB = Math.floor(monthly / priceNB);
+    sharesNB += nsNB;
+    const avNB = sharesNB * priceNB;
 
-    function renderStats() {
-      const due = getDueWords().length;
-      els.dueCount.textContent = due;
-      els.totalCount.textContent = words.length;
-      els.streakCount.textContent = updateStreak();
-    }
+    totalCashIn += totalCash;
+    labArr.push(lbl);
+    wB.push(Math.round(av));
+    woB.push(Math.round(avNB));
 
-    function renderReview() {
-      reviewQueue = getDueWords();
-      if (!reviewQueue.length) {
-        els.reviewEmpty.hidden = false;
-        els.reviewCard.hidden = true;
-        return;
+    const isHit = (i === (hit ?? -1));
+    const hitNBi = (!hitNB && avNB >= target) ? i : null;
+    if (hitNBi) hitNB = hitNBi;
+
+    rows.push({ i, lbl, yr, mo, price, monthly, bonus, ns, shares, av, isHit, isBonus: bonus > 0 });
+  }
+
+  const iv = shares0 * price0;
+  const finalAv = wB[wB.length - 1];
+  const gainTotal = Math.max(0, finalAv - totalCashIn);
+  const bonusTotal = bonuses.reduce((s,b)=>s+b.amount,0);
+  const regularIn = totalCashIn - iv - bonusTotal;
+
+  // Metrics
+  const hitRow = hit ? rows[hit - 1] : null;
+  const earlyMonths = (hit && hitNB) ? (hitNB - hit) : null;
+  document.getElementById('metrics').innerHTML = `
+    <div class="metric">
+      <div class="metric-label">目前資產估值</div>
+      <div class="metric-val">$${f(iv)}</div>
+      <div class="metric-sub">${shares0}股 × $${f(price0)}</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">距目標差距</div>
+      <div class="metric-val">${iv >= target ? '已達成' : '$' + f(target - iv)}</div>
+      <div class="metric-sub">目標 $${f(target)}</div>
+    </div>
+    <div class="metric ${hitRow ? 'accent' : ''}">
+      <div class="metric-label">預估達標月份</div>
+      <div class="metric-val">${hitRow ? hitRow.lbl : hit ? rows[hit-1].lbl : '超出試算範圍'}</div>
+      <div class="metric-sub">${hit ? '約 ' + hit + ' 個月後（' + (24 + Math.floor(hit/12)) + '歲）' : ''}</div>
+    </div>
+    ${earlyMonths ? `<div class="metric green">
+      <div class="metric-label">因特別注資提早</div>
+      <div class="metric-val">${earlyMonths} 個月</div>
+      <div class="metric-sub">注資共 $${f(bonusTotal)}</div>
+    </div>` : `<div class="metric">
+      <div class="metric-label">達標時股數</div>
+      <div class="metric-val">${hitRow ? hitRow.shares + ' 股' : '—'}</div>
+      <div class="metric-sub">${hitRow ? '股價約 $' + f(hitRow.price) : ''}</div>
+    </div>`}
+  `;
+
+  // Breakdown
+  const pcts = [iv, regularIn, bonusTotal, gainTotal].map(v => Math.round(v / finalAv * 100));
+  const items = [
+    { label:'原始本金', color:'#4f8ef7', pct:pcts[0], val:iv },
+    { label:'每月投入', color:'#2ecc87', pct:pcts[1], val:regularIn },
+    { label:'特別注資', color:'#f5a623', pct:pcts[2], val:bonusTotal },
+    { label:'複利增值', color:'#f75f5f', pct:Math.max(0,100-pcts[0]-pcts[1]-pcts[2]), val:gainTotal },
+  ];
+  const compoundPct = Math.max(0, 100 - pcts[0] - pcts[1] - pcts[2]);
+  document.getElementById('breakdown').innerHTML = `
+    <div class="breakdown-title">複利組成拆解（試算期末）</div>
+    ${items.map(it => `
+    <div class="br-row">
+      <span class="br-label">${it.label}</span>
+      <div class="br-bar-wrap"><div class="br-bar" style="width:${it.pct}%;background:${it.color}"></div></div>
+      <span class="br-val">$${f(it.val)}</span>
+    </div>`).join('')}
+    <div class="breakdown-note">
+      目前複利增值佔資產 <em>${compoundPct}%</em>。
+      當這個數字超過 <em>40%</em>，你才會真正感受到「錢在幫你賺錢」的加速感。
+      這個時間點大概落在資產 <em>150–200 萬</em>以後。
+    </div>
+  `;
+
+  // Table
+  document.getElementById('tableRange').textContent = `共 ${months} 個月試算`;
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    if (r.isHit) tr.className = 'row-hit';
+    else if (r.isBonus) tr.className = 'row-bonus';
+    const tags = [];
+    if (r.isHit) tags.push(`<span class="badge badge-blue">🎯 達標</span>`);
+    if (r.isBonus) tags.push(`<span class="badge badge-amber">${bonuses.filter(b=>b.year===r.yr&&b.month===r.mo).map(b=>b.label).join('/')}</span>`);
+    tr.innerHTML = `
+      <td>${r.lbl}</td>
+      <td>$${f(r.price)}</td>
+      <td>$${f(r.monthly)}</td>
+      <td>${r.bonus ? '<span style="color:var(--amber)">+$' + f(r.bonus) + '</span>' : '—'}</td>
+      <td>+${r.ns}</td>
+      <td>${f(r.shares)}</td>
+      <td>$${f(r.av)}</td>
+      <td>${tags.join(' ')}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Chart
+  const dark = true;
+  const gc = 'rgba(255,255,255,.05)';
+  const tc = '#555566';
+  const tgt = labArr.map(() => target);
+  const skipN = Math.max(1, Math.floor(months / 24));
+  if (chartInst) chartInst.destroy();
+  chartInst = new Chart(document.getElementById('chart'), {
+    type: 'line',
+    data: {
+      labels: labArr,
+      datasets: [
+        { label:'含注資', data:wB, borderColor:'#4f8ef7', backgroundColor:'rgba(79,142,247,.06)', fill:true, tension:.4, pointRadius:0, borderWidth:2 },
+        { label:'不含注資', data:woB, borderColor:'#333345', borderWidth:1.5, borderDash:[4,3], pointRadius:0, fill:false, tension:.4 },
+        { label:'目標', data:tgt, borderColor:'#f75f5f', borderWidth:1, borderDash:[8,4], pointRadius:0, fill:false },
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins: {
+        legend: { display:false },
+        tooltip: { callbacks: { label: c => c.dataset.label + ': $' + c.parsed.y.toLocaleString('zh-TW') } }
+      },
+      scales: {
+        x: {
+          ticks: { color:tc, font:{size:10}, maxRotation:45, callback:(v,i) => i % skipN === 0 ? labArr[i] : '' },
+          grid: { color:gc }
+        },
+        y: {
+          ticks: { color:tc, font:{size:10}, callback: v => v>=1e6 ? '$'+(v/1e6).toFixed(1)+'M' : '$'+(v/10000).toFixed(0)+'萬' },
+          grid: { color:gc }
+        }
       }
-      els.reviewEmpty.hidden = true;
-      els.reviewCard.hidden = false;
-      if (currentIndex >= reviewQueue.length) currentIndex = 0;
-      const item = reviewQueue[currentIndex];
-      els.reviewWord.textContent = item.word;
-      els.reviewMeaning.textContent = item.meaning || '未填寫';
-      els.reviewDue.textContent = `第 ${item.level + 1} 輪`; 
-      els.answerBox.hidden = true;
-      els.gradeActions.hidden = true;
-      els.showAnswerBtn.hidden = false;
-      els.answerBox.innerHTML = `
-        <div><strong>搭配詞</strong><br>${(item.collocations || []).join('<br>') || '未填寫'}</div>
-        <div style="margin-top:.75rem"><strong>例句</strong><br>${item.example || '未填寫'}</div>
-      `;
     }
+  });
+}
 
-    function renderLibrary() {
-      if (!words.length) {
-        els.libraryList.innerHTML = '<div class="card"><p class="muted">還沒有單字。先去「新增」放進第一個字吧。</p></div>';
-        return;
-      }
-      els.libraryList.innerHTML = [...words]
-        .sort((a,b) => (b.createdAt || '').localeCompare(a.createdAt || ''))
-        .map((item, idx) => `
-          <article class="list-item">
-            <div class="list-item-top">
-              <div>
-                <strong>${escapeHtml(item.word)}</strong>
-                <div class="tiny muted">${escapeHtml(item.meaning || '')}</div>
-              </div>
-              <div class="tiny muted">下次 ${escapeHtml(item.nextReview || todayStr())}</div>
-            </div>
-            <div class="tiny">${(item.collocations || []).map(c => `<span class="chip" style="margin-right:.35rem">${escapeHtml(c)}</span>`).join('')}</div>
-          </article>`).join('');
-    }
-
-    function escapeHtml(str) {
-      return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
-    }
-
-    function switchTab(target) {
-      els.sections.forEach(sec => sec.classList.toggle('active', sec.id === target));
-      els.navBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.target === target));
-    }
-
-    function gradeCurrent(type) {
-      const item = reviewQueue[currentIndex];
-      const currentLevel = item.level || 0;
-      if (type === 'good') {
-        item.level = Math.min(currentLevel + 1, intervalsGood.length - 1);
-        item.nextReview = addDays(todayStr(), intervalsGood[item.level]);
-      } else {
-        item.level = Math.max(currentLevel - 1, 0);
-        item.nextReview = addDays(todayStr(), intervalsAgain[item.level]);
-      }
-      words = words.map(w => w.word === item.word && w.createdAt === item.createdAt ? item : w);
-      saveWords();
-      renderStats();
-      renderLibrary();
-      renderReview();
-    }
-
-    els.showAnswerBtn.addEventListener('click', () => {
-      els.answerBox.hidden = false;
-      els.gradeActions.hidden = false;
-      els.showAnswerBtn.hidden = true;
-    });
-    els.goodBtn.addEventListener('click', () => gradeCurrent('good'));
-    els.againBtn.addEventListener('click', () => gradeCurrent('again'));
-
-    els.saveBtn.addEventListener('click', () => {
-      const word = els.wordInput.value.trim();
-      const meaning = els.meaningInput.value.trim();
-      if (!word || !meaning) {
-        alert('至少先填單字和中文意思。');
-        return;
-      }
-      const collocations = els.collocationInput.value.split(';').map(s => s.trim()).filter(Boolean);
-      const entry = {
-        word, meaning, collocations,
-        example: els.exampleInput.value.trim(),
-        level: 0,
-        nextReview: todayStr(),
-        createdAt: todayStr() + '-' + Math.random().toString(36).slice(2,7)
-      };
-      words.unshift(entry);
-      saveWords();
-      els.wordInput.value = '';
-      els.meaningInput.value = '';
-      els.collocationInput.value = '';
-      els.exampleInput.value = '';
-      renderStats();
-      renderLibrary();
-      renderReview();
-      switchTab('review');
-    });
-
-    els.seedBtn.addEventListener('click', () => {
-      if (words.length && !confirm('目前已有資料，載入示範會再加入 3 個示範單字。要繼續嗎？')) return;
-      words = [...seedWords, ...words];
-      saveWords();
-      renderStats();
-      renderLibrary();
-      renderReview();
-      switchTab('review');
-    });
-
-    els.navBtns.forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.target)));
-
-    renderStats();
-    renderLibrary();
-    renderReview();
-  </script>
+// Init
+renderBonusList();
+compute();
+</script>
 </body>
 </html>
