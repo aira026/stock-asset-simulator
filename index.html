@@ -479,7 +479,7 @@ const f = n => Math.round(n).toLocaleString('zh-TW');
 const fm = n => n >= 1e6 ? '$' + (n/1e6).toFixed(2) + 'M' : '$' + (n/10000).toFixed(1) + '萬';
 
 let target = 1000000;
-let bonuses = [{ year: 2026, month: 12, amount: 100000, label: '阿姨還款' }];
+let bonuses = [];
 let chartInst = null;
 let bonusId = 0;
 
