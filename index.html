@@ -563,6 +563,7 @@ function getBonusForMonth(year, month) {
 }
 
 function compute() {
+  const currentAge = new Date().getFullYear() - 2002;
   const shares0 = +document.getElementById('rShares').value;
   const price0  = +document.getElementById('rPrice').value;
   const monthly = +document.getElementById('rMonthly').value;
@@ -578,7 +579,8 @@ function compute() {
   let hit = null, hitNB = null;
   const rows = [], labArr = [], wB = [], woB = [];
   let totalCashIn = shares0 * price0;
-  const startDate = new Date(2026, 5, 1); // June 2026
+  const now = new Date();
+const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
 
   let months = BASE_MONTHS;
   // pre-scan to find hit
