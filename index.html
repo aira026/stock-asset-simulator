@@ -650,8 +650,7 @@ const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
     <div class="metric ${hitRow ? 'accent' : ''}">
       <div class="metric-label">預估達標月份</div>
       <div class="metric-val">${hitRow ? hitRow.lbl : hit ? rows[hit-1].lbl : '超出試算範圍'}</div>
-      <div class="metric-sub">${hit ? '約 ' + hit + ' 個月後
-        （' + (new Date(startDate.getFullYear(), startDate.getMonth() + hit).getFullYear() - 2002) + '歲）' : ''}</div>
+      <div class="metric-sub">${hit ? '約 ' + hit + ' 個月後（' + (new Date(startDate.getFullYear(), startDate.getMonth() + hit).getFullYear() - 2002) + '歲）' : ''}</div>
     </div>
     ${earlyMonths ? `<div class="metric green">
       <div class="metric-label">因特別注資提早</div>
